@@ -1,0 +1,27 @@
+  {
+    "overrides": {
+    "TelescopePlan": {
+      "context": "[*discriminator*Elements.TelescopePlan]",
+      "identity": {
+        "Add Id": {
+          "type": "string"
+        }
+      },
+      "behaviors": {
+        "add": {
+          "schema": {
+            "Boundary": {
+              "$ref": "https://hypar.io/Schemas/Geometry/Profile.json"
+            }
+          }
+        },
+        "remove": true
+      },
+      "schema": {
+        "Boundary": {
+          "$ref": "https://hypar.io/Schemas/Geometry/Profile.json"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,99 @@
+{
+  "$schema": "https://hypar.io/Schemas/Function.json",
+  "id": "9b9013b3-e0d3-48da-b109-944b668e1c2b",
+  "name": "MJTelescoperPlan",
+  "description": "The MJTelescoperPlan function.",
+  "language": "C#",
+  "model_dependencies": [
+    {
+      "autohide": false,
+      "name": "Site",
+      "optional": false
+    }
+  ],
+  "model_output": "Envelope",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "MaxTelescoping": {
+        "multipleOf": 1,
+        "default": 10,
+        "maximum": 50,
+        "description": "Max overall telescoping for a building arm",
+        "type": "number",
+        "$hyparOrder": 5,
+        "minimum": 10
+      },
+      "TelescopingMultiplier": {
+        "multipleOf": 0.01,
+        "default": 0.25,
+        "maximum": 1.0,
+        "description": "Multiplier controlling the spread",
+        "type": "number",
+        "$hyparOrder": 5,
+        "minimum": 0.0
+      },
+      "RecurseLimit": {
+        "multipleOf": 1,
+        "default": 3,
+        "maximum": 7,
+        "description": "Number of branches",
+        "type": "number",
+        "$hyparOrder": 3,
+        "minimum": 1
+      },
+      "MinHeight": {
+        "multipleOf": 1.0,
+        "default": 20.0,
+        "maximum": 30.0,
+        "description": "Min Height",
+        "type": "number",
+        "$hyparOrder": 6,
+        "minimum": 10
+      },
+      "MaxHeight": {
+        "multipleOf": 1.0,
+        "default": 60.0,
+        "maximum": 100.0,
+        "description": "Max Height",
+        "type": "number",
+        "$hyparOrder": 7,
+        "minimum": 30
+      },
+      "BuildingPolygon": {
+        "description": "The initial polygon from which telescoping occurs.",
+        "default": null,
+        "optional": false,
+        "type": "object",
+        "$hyparOrder": 0,
+        "$ref": "https://hypar.io/Schemas/Geometry/Polygon.json"
+      }
+    }
+  },
+  "outputs": [
+    {
+      "unit_type": "none",
+      "name": "Cells",
+      "description": "Cell count covered",
+      "type": "number"
+    },
+    {
+      "name": "Site Cover",
+      "description": "Site cover",
+      "type": "string"
+    },
+    {
+      "unit_type": "none",
+      "name": "Cell Size",
+      "description": "Length of cell.",
+      "type": "number"
+    }
+  ],
+  "element_types": [
+    "https://prod-api.hypar.io/schemas/Envelope",
+    "https://raw.githubusercontent.com/hypar-io/Schemas/master/Site.json",
+  ],
+  "repository_url": "https://github.com/hypar-io/function",
+  "last_updated": "0001-01-01T00:00:00",
+  "cli_version": "1.6.0"
+}
