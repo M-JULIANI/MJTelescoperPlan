@@ -16,24 +16,6 @@ namespace MJTelescoperPlan
 {
     public class MJTelescoperPlanOutputs: SystemResults
     {
-		/// <summary>
-		/// Cell count covered
-		/// </summary>
-		[JsonProperty("Cells")]
-		public double Cells {get; set;}
-
-		/// <summary>
-		/// Site cover
-		/// </summary>
-		[JsonProperty("Site Cover")]
-		public string SiteCover {get; set;}
-
-		/// <summary>
-		/// Length of cell.
-		/// </summary>
-		[JsonProperty("Cell Size")]
-		public double CellSize {get; set;}
-
 
 
         /// <summary>
@@ -46,23 +28,5 @@ namespace MJTelescoperPlan
         }
 
 
-        /// <summary>
-        /// Construct a MJTelescoperPlanOutputs specifying all inputs.
-        /// </summary>
-        /// <returns></returns>
-        [JsonConstructor]
-        public MJTelescoperPlanOutputs(double cells, string siteCover, double cellSize): base()
-        {
-			this.Cells = cells;
-			this.SiteCover = siteCover;
-			this.CellSize = cellSize;
-
-		}
-
-		public override string ToString()
-		{
-			var json = JsonConvert.SerializeObject(this);
-			return json;
-		}
 	}
 }

@@ -18,7 +18,14 @@ namespace MJTelescoperPlan
           Console.WriteLine("polygon: " + input.BuildingPolygon);
           if(input.BuildingPolygon == null) return outputs;
 
-          var plan = new TelescopePlan(new Profile(input.BuildingPolygon), input.MaxTelescoping, input.RecurseLimit);
+          var plan = new TelescopePlan(
+           new Profile(input.BuildingPolygon),
+           input.TelescopeSpread, 
+           input.RecurseLimit,
+           input.BaseHeight,
+           input.MaxHeight,
+           input.TelescopeExponent,
+           input.TelescopeStepPercent);
 
           // var plans = input.Overrides.TelescopePlan.CreateElements(
           //   input.Overrides.Additions.TelescopePlan,

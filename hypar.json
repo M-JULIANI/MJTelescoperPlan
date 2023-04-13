@@ -1,7 +1,7 @@
 {
   "$schema": "https://hypar.io/Schemas/Function.json",
   "id": "9b9013b3-e0d3-48da-b109-944b668e1c2b",
-  "name": "MJTelescoperPlan",
+  "name": "MJ_TelescoperPlan",
   "description": "The MJTelescoperPlan function.",
   "language": "C#",
   "model_dependencies": [
@@ -15,47 +15,56 @@
   "input_schema": {
     "type": "object",
     "properties": {
-      "MaxTelescoping": {
+      "TelescopeSpread": {
         "multipleOf": 1,
         "default": 10,
-        "maximum": 50,
-        "description": "Max overall telescoping for a building arm",
+        "maximum": 100,
+        "description": "Max overall telescoping for a building arm.",
         "type": "number",
-        "$hyparOrder": 5,
+        "$hyparOrder": 2,
         "minimum": 10
       },
-      "TelescopingMultiplier": {
-        "multipleOf": 0.01,
-        "default": 0.25,
-        "maximum": 1.0,
-        "description": "Multiplier controlling the spread",
+      "TelescopeExponent": {
+        "multipleOf": 0.1,
+        "default": 1.0,
+        "maximum": 2.0,
+        "description": "Exponent controlling the height distribution.",
         "type": "number",
-        "$hyparOrder": 5,
-        "minimum": 0.0
+        "$hyparOrder": 4,
+        "minimum": 1.0
+      },
+      "TelescopeStepPercent": {
+        "multipleOf": 0.1,
+        "default": 0.9,
+        "maximum": 1.0,
+        "description": "Percentage shrink at each step.",
+        "type": "number",
+        "$hyparOrder": 3,
+        "minimum": 0.9
       },
       "RecurseLimit": {
         "multipleOf": 1,
         "default": 3,
-        "maximum": 7,
-        "description": "Number of branches",
-        "type": "number",
-        "$hyparOrder": 3,
+        "maximum": 12,
+        "description": "Number of branches.",
+        "type": "integer",
+        "$hyparOrder": 1,
         "minimum": 1
       },
-      "MinHeight": {
+      "BaseHeight": {
         "multipleOf": 1.0,
         "default": 20.0,
         "maximum": 30.0,
-        "description": "Min Height",
+        "description": "Height of base of telescoping.",
         "type": "number",
         "$hyparOrder": 6,
         "minimum": 10
       },
       "MaxHeight": {
         "multipleOf": 1.0,
-        "default": 60.0,
-        "maximum": 100.0,
-        "description": "Max Height",
+        "default": 80.0,
+        "maximum": 150.0,
+        "description": "Height of top of telescoping.",
         "type": "number",
         "$hyparOrder": 7,
         "minimum": 30
@@ -71,27 +80,10 @@
     }
   },
   "outputs": [
-    {
-      "unit_type": "none",
-      "name": "Cells",
-      "description": "Cell count covered",
-      "type": "number"
-    },
-    {
-      "name": "Site Cover",
-      "description": "Site cover",
-      "type": "string"
-    },
-    {
-      "unit_type": "none",
-      "name": "Cell Size",
-      "description": "Length of cell.",
-      "type": "number"
-    }
   ],
   "element_types": [
     "https://prod-api.hypar.io/schemas/Envelope",
-    "https://raw.githubusercontent.com/hypar-io/Schemas/master/Site.json",
+    "https://raw.githubusercontent.com/hypar-io/Schemas/master/Site.json"
   ],
   "repository_url": "https://github.com/hypar-io/function",
   "last_updated": "0001-01-01T00:00:00",

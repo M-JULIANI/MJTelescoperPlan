@@ -29,19 +29,20 @@ namespace MJTelescoperPlan
     {
         [Newtonsoft.Json.JsonConstructor]
         
-        public MJTelescoperPlanInputs(double @maxTelescoping, double @telescopingMultiplier, double @recurseLimit, double @minHeight, double @maxHeight, Polygon @buildingPolygon, string bucketName, string uploadsBucket, Dictionary<string, string> modelInputKeys, string gltfKey, string elementsKey, string ifcKey):
+        public MJTelescoperPlanInputs(double @telescopeSpread, double @telescopeExponent, double @telescopeStepPercent, int @recurseLimit, double @baseHeight, double @maxHeight, Polygon @buildingPolygon, string bucketName, string uploadsBucket, Dictionary<string, string> modelInputKeys, string gltfKey, string elementsKey, string ifcKey):
         base(bucketName, uploadsBucket, modelInputKeys, gltfKey, elementsKey, ifcKey)
         {
             var validator = Validator.Instance.GetFirstValidatorForType<MJTelescoperPlanInputs>();
             if(validator != null)
             {
-                validator.PreConstruct(new object[]{ @maxTelescoping, @telescopingMultiplier, @recurseLimit, @minHeight, @maxHeight, @buildingPolygon});
+                validator.PreConstruct(new object[]{ @telescopeSpread, @telescopeExponent, @telescopeStepPercent, @recurseLimit, @baseHeight, @maxHeight, @buildingPolygon});
             }
         
-            this.MaxTelescoping = @maxTelescoping;
-            this.TelescopingMultiplier = @telescopingMultiplier;
+            this.TelescopeSpread = @telescopeSpread;
+            this.TelescopeExponent = @telescopeExponent;
+            this.TelescopeStepPercent = @telescopeStepPercent;
             this.RecurseLimit = @recurseLimit;
-            this.MinHeight = @minHeight;
+            this.BaseHeight = @baseHeight;
             this.MaxHeight = @maxHeight;
             this.BuildingPolygon = @buildingPolygon;
         
@@ -51,30 +52,35 @@ namespace MJTelescoperPlan
             }
         }
     
-        /// <summary>Max overall telescoping for a building arm</summary>
-        [Newtonsoft.Json.JsonProperty("MaxTelescoping", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        [System.ComponentModel.DataAnnotations.Range(10D, 50D)]
-        public double MaxTelescoping { get; set; } = 10D;
+        /// <summary>Max overall telescoping for a building arm.</summary>
+        [Newtonsoft.Json.JsonProperty("TelescopeSpread", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [System.ComponentModel.DataAnnotations.Range(10D, 100D)]
+        public double TelescopeSpread { get; set; } = 10D;
     
-        /// <summary>Multiplier controlling the spread</summary>
-        [Newtonsoft.Json.JsonProperty("TelescopingMultiplier", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        [System.ComponentModel.DataAnnotations.Range(0.0D, 1.0D)]
-        public double TelescopingMultiplier { get; set; } = 0.25D;
+        /// <summary>Exponent controlling the height distribution.</summary>
+        [Newtonsoft.Json.JsonProperty("TelescopeExponent", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [System.ComponentModel.DataAnnotations.Range(1.0D, 2.0D)]
+        public double TelescopeExponent { get; set; } = 1D;
     
-        /// <summary>Number of branches</summary>
+        /// <summary>Percentage shrink at each step.</summary>
+        [Newtonsoft.Json.JsonProperty("TelescopeStepPercent", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [System.ComponentModel.DataAnnotations.Range(0.9D, 1.0D)]
+        public double TelescopeStepPercent { get; set; } = 0.9D;
+    
+        /// <summary>Number of branches.</summary>
         [Newtonsoft.Json.JsonProperty("RecurseLimit", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        [System.ComponentModel.DataAnnotations.Range(1D, 7D)]
-        public double RecurseLimit { get; set; } = 3D;
+        [System.ComponentModel.DataAnnotations.Range(1, 12)]
+        public int RecurseLimit { get; set; } = 3;
     
-        /// <summary>Min Height</summary>
-        [Newtonsoft.Json.JsonProperty("MinHeight", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        /// <summary>Height of base of telescoping.</summary>
+        [Newtonsoft.Json.JsonProperty("BaseHeight", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.Range(10D, 30.0D)]
-        public double MinHeight { get; set; } = 20D;
+        public double BaseHeight { get; set; } = 20D;
     
-        /// <summary>Max Height</summary>
+        /// <summary>Height of top of telescoping.</summary>
         [Newtonsoft.Json.JsonProperty("MaxHeight", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        [System.ComponentModel.DataAnnotations.Range(30D, 100.0D)]
-        public double MaxHeight { get; set; } = 60D;
+        [System.ComponentModel.DataAnnotations.Range(30D, 150.0D)]
+        public double MaxHeight { get; set; } = 80D;
     
         /// <summary>The initial polygon from which telescoping occurs.</summary>
         [Newtonsoft.Json.JsonProperty("BuildingPolygon", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]

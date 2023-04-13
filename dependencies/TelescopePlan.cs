@@ -4,17 +4,25 @@ using Newtonsoft.Json;
 using Elements.Geometry.Solids;
 
 
-namespace Elements{
+namespace Elements
+{
     public class TelescopePlan : GeometricElement
     {
-        public Profile Boundary {get; set;}
+        private double _minModule = 5.0;
+        public Profile Boundary { get; set; }
 
         [JsonProperty("Add Id")]
-        public string AddId {get; set;}
+        public string AddId { get; set; }
 
-       // public Func<double , double, double> MapFunction {get; set;}
-        public double MaxTelescopeDistance {get; set;}
-        public int RecurseLimit {get; set;}
+        // public Func<double , double, double> MapFunction {get; set;}
+        public double MaxTelescopeDistance { get; set; }
+        public int RecurseLimit { get; set; }
+
+        public double MaxHeight { get; set; }
+        public double MinHeight { get; set; }
+
+        public double TelescopingMultiplier { get; set; }
+        public double PercentShrink {get; set;}
 
         // public TelescopePlan(TelescopePlanOverrideAddition add, Func<double, double, double> func, double max)
         // {
@@ -25,18 +33,37 @@ namespace Elements{
         // }
 
 
-        public TelescopePlan(Profile boundary, double max, double recurseLimit)
+        public TelescopePlan(Profile boundary, double max, int recurseLimit, double minHeight, double maxHeight, double multiplier, double percentShrink)
         {
             this.Boundary = boundary;
             this.AddId = Guid.NewGuid().ToString();
-            // this.MapFunction = func;
             this.MaxTelescopeDistance = max;
             this.RecurseLimit = (int)recurseLimit;
+            this.MinHeight = minHeight;
+            this.MaxHeight = maxHeight;
+            this.TelescopingMultiplier = multiplier;
+            this.PercentShrink = percentShrink;
         }
 
-    public double ComputeDistance(double x, double y)
+        public static double ComputeHorizontalDistance(int index, int recurseLimit, double maxTelescope, double minModule)
         {
-          return x / (y == 0 ? 1 : y);
+            double module = maxTelescope / (recurseLimit - 1);
+            double calc = module * index;
+            double percent = calc == 0 ? minModule : calc;
+            return percent;
+        }
+
+        public static double ComputeVerticalDistance(double minHeight, double maxHeight, int index, int maxIndex, double exponent = 1.0)
+        {
+            double initialPercent = index / (1.0 * (maxIndex - 1));
+            initialPercent = 1.0 - initialPercent;
+
+            double hInitial = minHeight + ((maxHeight - minHeight) * initialPercent);
+            double normalized = (hInitial - minHeight) / (maxHeight - minHeight);
+            double mapped = Math.Pow(normalized, exponent);
+            double renormed = (mapped * (maxHeight - minHeight)) + minHeight;
+            double clamped = Math.Min(Math.Max(renormed, minHeight), maxHeight);
+            return clamped;
         }
 
         // public bool Match(TelescopePlanIdentity identity)
@@ -52,68 +79,71 @@ namespace Elements{
 
         public override void UpdateRepresentations()
         {
-            if(this.Boundary == null || this.Boundary?.Segments() == null)
+            if (this.Boundary == null || this.Boundary?.Segments() == null)
             {
                 return;
             }
-            Console.WriteLine("segs: " + this.Boundary.Segments().Count);
             var finalSegments = GenerateShapes();
-            Console.WriteLine("FINAL segs: " + finalSegments.Count);
-            var reps = finalSegments.Select(x=> new Lamina(x));
+            var reps = finalSegments.Select(x => x);
             this.Representation = new Representation(new List<SolidOperation>());
-            reps.ToList().ForEach(r=> this.Representation.SolidOperations.Add(r));
-            this.Material = new Material("Telescope"){
-                Color="#ADD8E6"
+            reps.ToList().ForEach(r => this.Representation.SolidOperations.Add(r));
+            var verticalDistance = ComputeVerticalDistance(this.MinHeight, this.MaxHeight, 0, this.RecurseLimit + 1, this.TelescopingMultiplier);
+            this.Representation.SolidOperations.Add(new Extrude(this.Boundary, verticalDistance, Vector3.ZAxis, false));
+            this.Material = new Material("Telescope")
+            {
+                Color = "#ADD8E6"
             };
 
         }
 
-        private List<Profile> GenerateShapes()
+        private List<Extrude> GenerateShapes()
         {
             var segments = this.Boundary.Segments();
-            var finalSegments = new List<Profile>();
-            segments.ForEach(s=> RecurseTelescope(s, this.RecurseLimit, finalSegments));
+            var finalSegments = new List<Extrude>();
+            segments.ForEach(s => RecurseTelescope(s, this.RecurseLimit, finalSegments));
             return finalSegments;
         }
 
-        private void RecurseTelescope(Line segment, int limit, List<Profile> finalSegments)
+        private void RecurseTelescope(Line segment, int limit, List<Extrude> finalSegments)
         {
             var counter = 0;
 
             Polygon polygon = null;
             var selectedSegment = segment;
-            while(counter<limit)
+            Vector3 segmentDirection = segment.Direction().Unitized();
+            while (counter < limit)
             {
-                polygon = BuildPolygon(selectedSegment, counter);
-                selectedSegment = polygon.Segments()[0];
-                finalSegments.Add(new Profile(polygon));
+                var polygonAndHeight = BuildPolygon(selectedSegment, segmentDirection, counter);
+                polygon = polygonAndHeight.Polygon;
+                var height = polygonAndHeight.Height;
+                finalSegments.Add(new Extrude(new Profile(polygon), height, Vector3.ZAxis, false));
+                selectedSegment = polygon.Segments().ElementAt(2).Reversed();
                 counter++;
             }
         }
 
-        private Polygon BuildPolygon(Line segment, int index)
+        private (Polygon Polygon, double Height) BuildPolygon(Line segment, Vector3 segmentDirection, int index)
         {
-            var dir = segment.Direction().Unitized();
-            var cross = dir.Cross(Vector3.ZAxis);
-            
+            var cross = segmentDirection.Cross(Vector3.ZAxis).Unitized();
             Line line = new Line(segment.Start, segment.End);
+            var distance = ComputeHorizontalDistance(index, this.RecurseLimit, this.MaxTelescopeDistance, this._minModule);
+            var verticalDistance = ComputeVerticalDistance(this.MinHeight, this.MaxHeight, index, this.RecurseLimit, this.TelescopingMultiplier);
+            var funcResult = distance == 0 ? _minModule : distance;
+            var shrinkDistance = segment.Length() * (1 - this.PercentShrink);
 
-            var funcResult = ComputeDistance(index, this.MaxTelescopeDistance);
-            var offset =  funcResult == 0 ? (5 * index) + 5 : funcResult;
-            Console.WriteLine("index is: " + index);
-            Console.WriteLine("func result is: " + funcResult);
-            Console.WriteLine("offset is: " + offset);
-            var distance = 0.75;
             //shrink line
-            line.Start = line.Start + (dir * distance);
-            line.End = line.End - (dir * distance);
-            //offset line
-            var offsetStart = line.Start + (cross * offset);
-            var offsetEnd = line.End + (cross * offset);
-            Line offsetLine = new Line(offsetStart, offsetEnd);
+            var isSameDirection = line.Direction().Unitized().IsAlmostEqualTo(segmentDirection);
+            if (isSameDirection)
+            {
+                line.Start = line.Start + (segmentDirection * shrinkDistance);
+                line.End = line.End - (segmentDirection * shrinkDistance);
+            }
 
-            var vecs = new Vector3[]{line.Start, line.End, offsetLine.End, offsetLine.Start};
-            return new Polygon(vecs);
+            var xform = new Transform(cross * funcResult);
+            Line offsetLine = line.TransformedLine(xform);
+
+            var vecs = new Vector3[] { line.Start, line.End, offsetLine.End, offsetLine.Start, line.Start };
+            return (new Polygon(vecs), verticalDistance);
         }
 
     }
