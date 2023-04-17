@@ -14,7 +14,6 @@ namespace Elements
         [JsonProperty("Add Id")]
         public string AddId { get; set; }
 
-        // public Func<double , double, double> MapFunction {get; set;}
         public double MaxTelescopeDistance { get; set; }
         public int RecurseLimit { get; set; }
 
@@ -23,14 +22,6 @@ namespace Elements
 
         public double TelescopingMultiplier { get; set; }
         public double PercentShrink {get; set;}
-
-        // public TelescopePlan(TelescopePlanOverrideAddition add, Func<double, double, double> func, double max)
-        // {
-        //     this.Boundary = add.Value.Boundary;
-        //     this.AddId = add.Id;
-        //     this.MapFunction = func;
-        //     this.MaxTelescopeDistance = max;
-        // }
 
 
         public TelescopePlan(Profile boundary, double max, int recurseLimit, double minHeight, double maxHeight, double multiplier, double percentShrink)
@@ -65,17 +56,6 @@ namespace Elements
             double clamped = Math.Min(Math.Max(renormed, minHeight), maxHeight);
             return clamped;
         }
-
-        // public bool Match(TelescopePlanIdentity identity)
-        // {
-        //     return identity.AddId ==this.AddId;
-        // }
-
-        // public TelescopePlan Update(TelescopePlanOverride edit)
-        // {
-        //     this.Boundary = edit.Value.Boundary;
-        //     return this;
-        // }
 
         public override void UpdateRepresentations()
         {

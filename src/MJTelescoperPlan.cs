@@ -27,17 +27,6 @@ namespace MJTelescoperPlan
            input.TelescopeExponent,
            input.TelescopeStepPercent);
 
-          // var plans = input.Overrides.TelescopePlan.CreateElements(
-          //   input.Overrides.Additions.TelescopePlan,
-          //   input.Overrides.Removals.TelescopePlan,
-          //   (add)=> new TelescopePlan(add, ComputeDistance, input.MaxTelescoping),
-          //   (plan, identity)=> plan.Match(identity),
-          //   (plan, edit)=> plan.Update(edit)
-          // );
-
-         // var mass = new Mass(new Profile(input.BuildingPolygon));
-        //  if(mass!=null) outputs.Model.AddElement(mass);
-
           outputs.Model.AddElements(plan);
           return outputs;
         }
